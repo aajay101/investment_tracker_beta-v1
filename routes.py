@@ -402,64 +402,59 @@ def watchlist():
 def add_portfolio_item():
     """Add a new item to user's portfolio"""
     form = PortfolioItemForm()
-    if form.validate_on_submit():
-        # Get form data with null checks
-        symbol = form.symbol.data if form.symbol.data else ""
+    logger.info(f"Form submitted: {form.data}")
+    logger.info(f"Form errors: {form.errors}")
+    
+    if not form.validate_on_submit():
+        # Log validation errors
+        logger.error(f"Form validation failed: {form.errors}")
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", "danger")
+        return redirect(url_for('dashboard'))
+    
+    # Form is valid, process it
+    try:
+        # Get form data
+        symbol = form.symbol.data
         
-        # Validate required fields
-        if not symbol:
-            flash("Stock symbol is required", "danger")
+        # Check if stock symbol is valid
+        logger.info(f"Validating stock symbol: {symbol}")
+        current_price = get_stock_price(symbol)
+        if current_price is None:
+            flash(f"Invalid stock symbol: {symbol}. Please check and try again.", "danger")
             return redirect(url_for('dashboard'))
             
-        try:
-            # Check if stock symbol is valid
-            logger.info(f"Validating stock symbol: {symbol}")
-            current_price = get_stock_price(symbol)
-            if current_price is None:
-                flash(f"Invalid stock symbol: {symbol}. Please check and try again.", "danger")
-                return redirect(url_for('dashboard'))
-                
-            # Get remaining form data
-            quantity = form.quantity.data if form.quantity.data is not None else 0
+        # Get remaining form data
+        quantity = form.quantity.data
+        buy_price = float(form.buy_price.data)
+        exchange = form.exchange.data
             
-            # Explicitly handle buy_price - this is a key fix for the form validation issue
-            if form.buy_price.data is None:
-                flash("Buy price is required", "danger")
-                return redirect(url_for('dashboard'))
-                
-            buy_price = float(form.buy_price.data)
-            exchange = form.exchange.data if form.exchange.data else "NSE"
-            
-            # Validate the buy price
-            if buy_price <= 0:
-                flash("Buy price must be greater than zero", "danger")
-                return redirect(url_for('dashboard'))
-            
-            # Add the portfolio item
-            logger.info(f"Creating portfolio item: {symbol}, {quantity}, {buy_price}, {exchange}")
-            portfolio_item = PortfolioItem(
-                symbol=symbol,
-                quantity=quantity,
-                buy_price=buy_price,
-                exchange=exchange,
-                user_id=current_user.id
-            )
-            db.session.add(portfolio_item)
-            db.session.commit()
-            
-            flash(f"{symbol} added to your portfolio successfully!", "success")
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Error adding portfolio item: {str(e)}")
-            flash(f"Error adding item to portfolio: {str(e)}", "danger")
-    else:
-        try:
-            format_form_errors(form, form.errors)
-        except Exception as e:
-            logger.error(f"Error formatting form errors: {str(e)}")
-            flash("Form validation failed. Please check your inputs.", "danger")
-    
-    return redirect(url_for('dashboard'))
+        # Validate the buy price
+        if buy_price <= 0:
+            flash("Buy price must be greater than zero", "danger")
+            return redirect(url_for('dashboard'))
+        
+        # Add the portfolio item
+        logger.info(f"Creating portfolio item: {symbol}, {quantity}, {buy_price}, {exchange}")
+        portfolio_item = PortfolioItem(
+            symbol=symbol,
+            quantity=quantity,
+            buy_price=buy_price,
+            exchange=exchange,
+            user_id=current_user.id
+        )
+        db.session.add(portfolio_item)
+        db.session.commit()
+        
+        flash(f"{symbol} added to your portfolio successfully!", "success")
+        return redirect(url_for('dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding portfolio item: {str(e)}")
+        flash(f"Error adding item to portfolio: {str(e)}", "danger")
+        return redirect(url_for('dashboard'))
 
 @app.route('/portfolio/delete/<int:item_id>', methods=['POST'])
 @login_required
