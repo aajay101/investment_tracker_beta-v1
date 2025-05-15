@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initStockSymbolAutocomplete();
     initDeleteConfirmations();
+    initEditFunctionality();
 });
 
 /**
@@ -85,9 +86,52 @@ function initDeleteConfirmations() {
     
     deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item?')) {
-                e.preventDefault();
-            }
+            e.preventDefault();
+            const form = this.closest('form');
+            const symbol = this.closest('tr').querySelector('td:first-child').textContent.trim();
+            
+            // Create a more attractive confirmation dialog
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.id = 'deleteConfirmModal';
+            confirmModal.setAttribute('tabindex', '-1');
+            confirmModal.setAttribute('aria-labelledby', 'deleteConfirmModalLabel');
+            confirmModal.setAttribute('aria-hidden', 'true');
+            
+            confirmModal.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete <strong>${symbol}</strong> from your portfolio?</p>
+                            <p class="text-danger"><small>This action cannot be undone.</small></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            
+            // Initialize and show the modal
+            const modal = new bootstrap.Modal(confirmModal);
+            modal.show();
+            
+            // Handle confirmation
+            document.getElementById('confirmDelete').addEventListener('click', function() {
+                form.submit();
+            });
+            
+            // Remove modal from DOM after it's hidden
+            confirmModal.addEventListener('hidden.bs.modal', function() {
+                confirmModal.remove();
+            });
         });
     });
 }
@@ -120,4 +164,54 @@ function formatCurrency(amount) {
  */
 function formatPercent(value) {
     return value.toFixed(2) + '%';
+}
+
+/**
+ * Initialize the edit form functionality
+ */
+function initEditFunctionality() {
+    // For the edit form, add validations and improvements
+    const editForm = document.querySelector('.edit-portfolio-form');
+    if (!editForm) return;
+    
+    // Validate form before submission
+    editForm.addEventListener('submit', function(e) {
+        // Get form inputs
+        const quantity = parseFloat(document.getElementById('quantity').value);
+        const buyPrice = parseFloat(document.getElementById('buy_price').value);
+        
+        let isValid = true;
+        let errorMessages = [];
+        
+        // Validate quantity
+        if (isNaN(quantity) || quantity <= 0) {
+            isValid = false;
+            errorMessages.push('Quantity must be a positive number');
+        }
+        
+        // Validate buy price
+        if (isNaN(buyPrice) || buyPrice <= 0) {
+            isValid = false;
+            errorMessages.push('Buy price must be a positive number');
+        }
+        
+        // Display errors or submit
+        if (!isValid) {
+            e.preventDefault();
+            
+            // Create alert for errors
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.innerHTML = '<ul class="mb-0">' + 
+                errorMessages.map(msg => `<li>${msg}</li>`).join('') + 
+                '</ul>';
+            
+            // Show alert at top of form
+            const formElements = editForm.querySelector('.card-body');
+            formElements.insertBefore(alertDiv, formElements.firstChild);
+            
+            // Scroll to top of form
+            window.scrollTo(0, 0);
+        }
+    });
 }
