@@ -467,6 +467,63 @@ def add_portfolio_item():
         flash(f"Error adding item to portfolio: {str(e)}", "danger")
         return redirect(url_for('dashboard'))
 
+@app.route('/portfolio/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def edit_portfolio_item(item_id):
+    """Edit a portfolio item"""
+    item = PortfolioItem.query.get_or_404(item_id)
+    
+    # Check if the item belongs to the current user
+    if item.user_id != current_user.id:
+        flash("You don't have permission to edit this item", "danger")
+        return redirect(url_for('dashboard'))
+    
+    form = PortfolioItemForm()
+    
+    if request.method == 'GET':
+        # Pre-populate form with existing data
+        form.symbol.data = item.symbol
+        form.quantity.data = item.quantity
+        form.buy_price.data = item.buy_price
+        form.exchange.data = item.exchange
+        
+        return render_template('edit_portfolio_item.html', form=form, item=item)
+    
+    # Handle form submission
+    if form.validate_on_submit():
+        try:
+            # Check if stock symbol is valid
+            symbol = form.symbol.data
+            logger.info(f"Validating stock symbol: {symbol}")
+            current_price = get_stock_price(symbol)
+            if current_price is None:
+                flash(f"Invalid stock symbol: {symbol}. Please check and try again.", "danger")
+                return render_template('edit_portfolio_item.html', form=form, item=item)
+            
+            # Update the item data
+            item.symbol = symbol
+            item.quantity = form.quantity.data
+            item.buy_price = float(form.buy_price.data)
+            item.exchange = form.exchange.data
+            
+            db.session.commit()
+            flash(f"{symbol} has been updated in your portfolio", "success")
+            return redirect(url_for('dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating portfolio item: {str(e)}")
+            flash(f"Error updating portfolio item: {str(e)}", "danger")
+            return render_template('edit_portfolio_item.html', form=form, item=item)
+    
+    # Form validation failed
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f"{field}: {error}", "danger")
+    
+    return render_template('edit_portfolio_item.html', form=form, item=item)
+
+
 @app.route('/portfolio/delete/<int:item_id>', methods=['POST'])
 @login_required
 def delete_portfolio_item(item_id):
