@@ -131,6 +131,11 @@ body {
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  /* Ensure numbers don't overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-box-investment {
