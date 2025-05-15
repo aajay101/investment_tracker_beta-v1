@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-4">Portfolio Reports</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Generate Reports</h5>
+            </div>
+            <div class="card-body">
+                <p>Generate detailed reports of your investment portfolio in various formats.</p>
+                
+                <form method="POST" action="{{ url_for('generate_report') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label for="{{ form.report_type.id }}" class="form-label">{{ form.report_type.label }}</label>
+                            {{ form.report_type(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.submit(class="btn btn-primary w-100") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Report Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF Reports</h6>
+                        <ul>
+                            <li>Complete portfolio summary</li>
+                            <li>Individual stock performance</li>
+                            <li>Gain/loss analysis</li>
+                            <li>Top performing stocks</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold"><i class="fas fa-file-excel me-2 text-success"></i>Excel Reports</h6>
+                        <ul>
+                            <li>Detailed spreadsheet format</li>
+                            <li>Sortable data</li>
+                            <li>Calculation-ready cells</li>
+                            <li>Easy to integrate with financial software</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Report Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start mb-3">
+                    <i class="fas fa-lightbulb text-warning me-3 mt-1"></i>
+                    <div>
+                        <h6>Tax Planning</h6>
+                        <p class="small">Generate reports at the end of each financial year for tax filing purposes.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-start mb-3">
+                    <i class="fas fa-chart-pie text-info me-3 mt-1"></i>
+                    <div>
+                        <h6>Asset Allocation</h6>
+                        <p class="small">Use reports to analyze your portfolio's diversification and adjust as needed.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-history text-success me-3 mt-1"></i>
+                    <div>
+                        <h6>Performance Tracking</h6>
+                        <p class="small">Generate monthly reports to track your portfolio's growth over time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Before Generating</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Make sure your portfolio is up-to-date for accurate reporting.
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

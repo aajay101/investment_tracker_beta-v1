@@ -1,0 +1,304 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1 class="mb-4">{{ current_user.username }}'s Dashboard</h1>
+
+<!-- Portfolio Summary -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="summary-box summary-box-investment">
+            <div class="summary-box-title">Total Investment</div>
+            <div class="summary-box-value">₹{{ "%.2f"|format(total_investment) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box summary-box-current">
+            <div class="summary-box-title">Current Value</div>
+            <div class="summary-box-value">₹{{ "%.2f"|format(total_current_value) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box {% if total_gain_loss >= 0 %}summary-box-gain{% else %}summary-box-loss{% endif %}">
+            <div class="summary-box-title">Total Gain/Loss</div>
+            <div class="summary-box-value {% if total_gain_loss >= 0 %}gain{% else %}loss{% endif %}">
+                ₹{{ "%.2f"|format(total_gain_loss) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box {% if total_gain_loss_percent >= 0 %}summary-box-gain{% else %}summary-box-loss{% endif %}">
+            <div class="summary-box-title">Total Return</div>
+            <div class="summary-box-value {% if total_gain_loss_percent >= 0 %}gain{% else %}loss{% endif %}">
+                {{ "%.2f"|format(total_gain_loss_percent) }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Charts -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Portfolio Value Over Time</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="performanceChart" data-chart='{{ performance_data|tojson }}'></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Daily Change (%)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="dailyChangeChart" data-chart='{{ performance_data|tojson }}'></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio and Watchlist Tabs -->
+<ul class="nav nav-tabs mb-3" id="dashboardTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab" aria-controls="portfolio" aria-selected="true">
+            <i class="fas fa-briefcase me-2"></i>My Portfolio
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="watchlist-tab" data-bs-toggle="tab" data-bs-target="#watchlist" type="button" role="tab" aria-controls="watchlist" aria-selected="false">
+            <i class="fas fa-eye me-2"></i>My Watchlist
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="dashboardTabsContent">
+    <!-- Portfolio Tab -->
+    <div class="tab-pane fade show active" id="portfolio" role="tabpanel" aria-labelledby="portfolio-tab">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Portfolio</h5>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPortfolioItemModal">
+                    <i class="fas fa-plus me-1"></i> Add Stock
+                </button>
+            </div>
+            <div class="card-body">
+                {% if portfolio_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Quantity</th>
+                                    <th>Buy Price</th>
+                                    <th>Current Price</th>
+                                    <th>Investment</th>
+                                    <th>Current Value</th>
+                                    <th>Gain/Loss</th>
+                                    <th>Return %</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in portfolio_data %}
+                                <tr class="portfolio-item">
+                                    <td>{{ item.symbol }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ "%.2f"|format(item.buy_price) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.current_price) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.investment) }}</td>
+                                    <td>₹{{ "%.2f"|format(item.current_value) }}</td>
+                                    <td class="{% if item.gain_loss >= 0 %}gain{% else %}loss{% endif %}">
+                                        ₹{{ "%.2f"|format(item.gain_loss) }}
+                                    </td>
+                                    <td class="{% if item.gain_loss_percent >= 0 %}gain{% else %}loss{% endif %}">
+                                        {{ "%.2f"|format(item.gain_loss_percent) }}%
+                                    </td>
+                                    <td>
+                                        <form action="{{ url_for('delete_portfolio_item', item_id=item.id) }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-danger btn-sm delete-item-btn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your portfolio is empty. Add stocks to start tracking your investments!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Watchlist Tab -->
+    <div class="tab-pane fade" id="watchlist" role="tabpanel" aria-labelledby="watchlist-tab">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Watchlist</h5>
+                <div>
+                    <button id="refresh-watchlist" class="btn btn-outline-info btn-sm me-2">
+                        <i class="fas fa-sync-alt"></i> Refresh Prices
+                    </button>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addWatchlistItemModal">
+                        <i class="fas fa-plus me-1"></i> Add Stock
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if watchlist_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Exchange</th>
+                                    <th>Current Price</th>
+                                    <th>Daily Change</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in watchlist_data %}
+                                <tr class="watchlist-item" data-symbol="{{ item.symbol }}">
+                                    <td>{{ item.symbol }}</td>
+                                    <td>{{ item.exchange }}</td>
+                                    <td class="current-price">₹{{ "%.2f"|format(item.current_price) }}</td>
+                                    <td class="daily-change {% if item.daily_change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ "+" if item.daily_change >= 0 else "" }}{{ "%.2f"|format(item.daily_change) }}
+                                        ({{ "+" if item.daily_change_percent >= 0 else "" }}{{ "%.2f"|format(item.daily_change_percent) }}%)
+                                    </td>
+                                    <td>
+                                        <div class="notes-content {% if not item.notes %}text-muted{% endif %}" data-item-id="{{ item.id }}">
+                                            {{ item.notes if item.notes else "No notes" }}
+                                        </div>
+                                        <div class="notes-form d-none" data-item-id="{{ item.id }}">
+                                            <form action="{{ url_for('update_watchlist_notes', item_id=item.id) }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <div class="input-group">
+                                                    <textarea name="notes" class="form-control form-control-sm" rows="2">{{ item.notes }}</textarea>
+                                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                                    <button type="button" class="btn btn-sm btn-secondary cancel-notes-btn" data-item-id="{{ item.id }}">Cancel</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm edit-notes-btn" data-item-id="{{ item.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form action="{{ url_for('delete_watchlist_item', item_id=item.id) }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-danger btn-sm delete-item-btn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your watchlist is empty. Add stocks to start monitoring potential investments!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Portfolio Item Modal -->
+<div class="modal fade" id="addPortfolioItemModal" tabindex="-1" aria-labelledby="addPortfolioItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPortfolioItemModalLabel">Add Stock to Portfolio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_portfolio_item') }}">
+                {{ portfolio_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.symbol.id }}" class="form-label">{{ portfolio_form.symbol.label }}</label>
+                        <div class="position-relative">
+                            {{ portfolio_form.symbol(class="form-control stock-symbol-input", placeholder="e.g. RELIANCE") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.quantity.id }}" class="form-label">{{ portfolio_form.quantity.label }}</label>
+                        {{ portfolio_form.quantity(class="form-control", placeholder="Number of shares") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.buy_price.id }}" class="form-label">{{ portfolio_form.buy_price.label }}</label>
+                        {{ portfolio_form.buy_price(class="form-control", placeholder="Price per share in INR") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.exchange.id }}" class="form-label">{{ portfolio_form.exchange.label }}</label>
+                        {{ portfolio_form.exchange(class="form-select") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ portfolio_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Watchlist Item Modal -->
+<div class="modal fade" id="addWatchlistItemModal" tabindex="-1" aria-labelledby="addWatchlistItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addWatchlistItemModalLabel">Add Stock to Watchlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_watchlist_item') }}">
+                {{ watchlist_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.symbol.id }}" class="form-label">{{ watchlist_form.symbol.label }}</label>
+                        <div class="position-relative">
+                            {{ watchlist_form.symbol(class="form-control stock-symbol-input", placeholder="e.g. RELIANCE") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.exchange.id }}" class="form-label">{{ watchlist_form.exchange.label }}</label>
+                        {{ watchlist_form.exchange(class="form-select") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.notes.id }}" class="form-label">{{ watchlist_form.notes.label }}</label>
+                        {{ watchlist_form.notes(class="form-control", placeholder="Optional notes about this stock") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ watchlist_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/portfolio.js') }}"></script>
+<script src="{{ url_for('static', filename='js/watchlist.js') }}"></script>
+{% endblock %}

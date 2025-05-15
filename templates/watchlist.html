@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-4">My Watchlist</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <button id="refresh-watchlist" class="btn btn-outline-info me-2">
+            <i class="fas fa-sync-alt"></i> Refresh Prices
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addWatchlistItemModal">
+            <i class="fas fa-plus me-1"></i> Add Stock
+        </button>
+    </div>
+</div>
+
+<!-- Watchlist Details -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Watchlist Details</h5>
+    </div>
+    <div class="card-body">
+        {% if watchlist_data %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Exchange</th>
+                            <th>Current Price</th>
+                            <th>Daily Change</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in watchlist_data %}
+                        <tr class="watchlist-item" data-symbol="{{ item.symbol }}">
+                            <td>{{ item.symbol }}</td>
+                            <td>{{ item.exchange }}</td>
+                            <td class="current-price">₹{{ "%.2f"|format(item.current_price) }}</td>
+                            <td class="daily-change {% if item.daily_change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ "+" if item.daily_change >= 0 else "" }}{{ "%.2f"|format(item.daily_change) }}
+                                ({{ "+" if item.daily_change_percent >= 0 else "" }}{{ "%.2f"|format(item.daily_change_percent) }}%)
+                            </td>
+                            <td>
+                                <div class="notes-content {% if not item.notes %}text-muted{% endif %}" data-item-id="{{ item.id }}">
+                                    {{ item.notes if item.notes else "No notes" }}
+                                </div>
+                                <div class="notes-form d-none" data-item-id="{{ item.id }}">
+                                    <form action="{{ url_for('update_watchlist_notes', item_id=item.id) }}" method="POST">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <div class="input-group">
+                                            <textarea name="notes" class="form-control form-control-sm" rows="2">{{ item.notes }}</textarea>
+                                            <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                            <button type="button" class="btn btn-sm btn-secondary cancel-notes-btn" data-item-id="{{ item.id }}">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-info btn-sm edit-notes-btn" data-item-id="{{ item.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="{{ url_for('delete_watchlist_item', item_id=item.id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm delete-item-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Your watchlist is empty. Add stocks to start monitoring potential investments!
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Watchlist Item Modal -->
+<div class="modal fade" id="addWatchlistItemModal" tabindex="-1" aria-labelledby="addWatchlistItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addWatchlistItemModalLabel">Add Stock to Watchlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_watchlist_item') }}">
+                {{ watchlist_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.symbol.id }}" class="form-label">{{ watchlist_form.symbol.label }}</label>
+                        <div class="position-relative">
+                            {{ watchlist_form.symbol(class="form-control stock-symbol-input", placeholder="e.g. RELIANCE") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.exchange.id }}" class="form-label">{{ watchlist_form.exchange.label }}</label>
+                        {{ watchlist_form.exchange(class="form-select") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ watchlist_form.notes.id }}" class="form-label">{{ watchlist_form.notes.label }}</label>
+                        {{ watchlist_form.notes(class="form-control", placeholder="Optional notes about this stock") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ watchlist_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/watchlist.js') }}"></script>
+{% endblock %}

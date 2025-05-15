@@ -1,0 +1,203 @@
+/* Custom styles for Investment Dashboard */
+
+/* Override bootstrap dark theme variables for better readability */
+:root {
+  --main-bg-color: #1a1a2e;
+  --card-bg-color: #16213e;
+  --highlight-color: #0f3460;
+  --accent-color: #0abde3;
+  --success-color: #2ecc71;
+  --danger-color: #e74c3c;
+  --warning-color: #f39c12;
+  --text-color: #f5f5f5;
+  --text-secondary: #b2bec3;
+}
+
+body {
+  background-color: var(--main-bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Custom card styling */
+.card {
+  background-color: var(--card-bg-color);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background-color: var(--highlight-color);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0 !important;
+  font-weight: 500;
+}
+
+/* Portfolio items */
+.portfolio-item {
+  border-left: 4px solid var(--highlight-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.portfolio-item:hover {
+  background-color: rgba(15, 52, 96, 0.5);
+}
+
+.gain {
+  color: var(--success-color);
+}
+
+.loss {
+  color: var(--danger-color);
+}
+
+/* Watchlist items */
+.watchlist-item {
+  border-left: 4px solid var(--highlight-color);
+  transition: all 0.2s ease-in-out;
+}
+
+.watchlist-item:hover {
+  background-color: rgba(15, 52, 96, 0.5);
+}
+
+/* Form styling */
+.form-control, .form-select {
+  background-color: rgba(22, 33, 62, 0.7);
+  border: 1px solid #2c3e50;
+  color: var(--text-color);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: rgba(22, 33, 62, 0.9);
+  color: var(--text-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.25rem rgba(10, 189, 227, 0.25);
+}
+
+/* Stock symbol autocomplete */
+.autocomplete-dropdown {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--card-bg-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.autocomplete-item:hover {
+  background-color: var(--highlight-color);
+}
+
+.autocomplete-item.no-results {
+  cursor: default;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Dashboard summary boxes */
+.summary-box {
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.summary-box-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.summary-box-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.summary-box-investment {
+  background-color: rgba(52, 73, 94, 0.6);
+}
+
+.summary-box-current {
+  background-color: rgba(39, 174, 96, 0.2);
+}
+
+.summary-box-gain {
+  background-color: rgba(46, 204, 113, 0.2);
+}
+
+.summary-box-loss {
+  background-color: rgba(231, 76, 60, 0.2);
+}
+
+/* Notes styling */
+.notes-content {
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.notes-form {
+  margin-top: 0.5rem;
+}
+
+/* Chart containers */
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-bottom: 1.5rem;
+}
+
+/* Loading indicator */
+.loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner 0.75s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom dashboard icon */
+.dashboard-icon {
+  max-width: 32px;
+  margin-right: 10px;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .summary-box-value {
+    font-size: 1.4rem;
+  }
+}

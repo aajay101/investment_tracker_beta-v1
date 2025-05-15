@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="230" fill="#0D1117" stroke="#0abde3" stroke-width="8" />
+  
+  <!-- Compass outer ring -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#0abde3" stroke-width="12" stroke-opacity="0.8" />
+  
+  <!-- Inner shape - compass star -->
+  <g fill="none" stroke="#0abde3" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main compass points -->
+    <line x1="256" y1="81" x2="256" y2="138" />
+    <line x1="256" y1="374" x2="256" y2="431" />
+    <line x1="81" y1="256" x2="138" y2="256" />
+    <line x1="374" y1="256" x2="431" y2="256" />
+    
+    <!-- Compass star arms -->
+    <polygon points="256,138 218,218 138,256 218,294 256,374 294,294 374,256 294,218" />
+    
+    <!-- Tick marks -->
+    <line x1="154" y1="154" x2="169" y2="169" />
+    <line x1="358" y1="154" x2="343" y2="169" />
+    <line x1="154" y1="358" x2="169" y2="343" />
+    <line x1="358" y1="358" x2="343" y2="343" />
+    
+    <line x1="180" y1="123" x2="185" y2="143" />
+    <line x1="332" y1="123" x2="327" y2="143" />
+    <line x1="123" y1="180" x2="143" y2="185" />
+    <line x1="123" y1="332" x2="143" y2="327" />
+    
+    <line x1="180" y1="389" x2="185" y2="369" />
+    <line x1="332" y1="389" x2="327" y2="369" />
+    <line x1="389" y1="180" x2="369" y2="185" />
+    <line x1="389" y1="332" x2="369" y2="327" />
+  </g>
+  
+  <!-- Glow effect -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#0abde3" stroke-width="2" stroke-opacity="0.4" filter="url(#glow)" />
+  
+  <!-- Define glow filter -->
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+</svg>

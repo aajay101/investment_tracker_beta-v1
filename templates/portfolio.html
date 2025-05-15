@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="mb-4">My Portfolio</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPortfolioItemModal">
+            <i class="fas fa-plus me-1"></i> Add Stock
+        </button>
+    </div>
+</div>
+
+<!-- Portfolio Summary -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="summary-box summary-box-investment">
+            <div class="summary-box-title">Total Investment</div>
+            <div class="summary-box-value">₹{{ "%.2f"|format(total_investment) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box summary-box-current">
+            <div class="summary-box-title">Current Value</div>
+            <div class="summary-box-value">₹{{ "%.2f"|format(total_current_value) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box {% if total_gain_loss >= 0 %}summary-box-gain{% else %}summary-box-loss{% endif %}">
+            <div class="summary-box-title">Total Gain/Loss</div>
+            <div class="summary-box-value {% if total_gain_loss >= 0 %}gain{% else %}loss{% endif %}">
+                ₹{{ "%.2f"|format(total_gain_loss) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="summary-box {% if total_gain_loss_percent >= 0 %}summary-box-gain{% else %}summary-box-loss{% endif %}">
+            <div class="summary-box-title">Total Return</div>
+            <div class="summary-box-value {% if total_gain_loss_percent >= 0 %}gain{% else %}loss{% endif %}">
+                {{ "%.2f"|format(total_gain_loss_percent) }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Portfolio Details -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Portfolio Details</h5>
+    </div>
+    <div class="card-body">
+        {% if portfolio_data %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Quantity</th>
+                            <th>Buy Price</th>
+                            <th>Current Price</th>
+                            <th>Investment</th>
+                            <th>Current Value</th>
+                            <th>Gain/Loss</th>
+                            <th>Return %</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in portfolio_data %}
+                        <tr class="portfolio-item">
+                            <td>{{ item.symbol }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ "%.2f"|format(item.buy_price) }}</td>
+                            <td>₹{{ "%.2f"|format(item.current_price) }}</td>
+                            <td>₹{{ "%.2f"|format(item.investment) }}</td>
+                            <td>₹{{ "%.2f"|format(item.current_value) }}</td>
+                            <td class="{% if item.gain_loss >= 0 %}gain{% else %}loss{% endif %}">
+                                ₹{{ "%.2f"|format(item.gain_loss) }}
+                            </td>
+                            <td class="{% if item.gain_loss_percent >= 0 %}gain{% else %}loss{% endif %}">
+                                {{ "%.2f"|format(item.gain_loss_percent) }}%
+                            </td>
+                            <td>
+                                <form action="{{ url_for('delete_portfolio_item', item_id=item.id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm delete-item-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Your portfolio is empty. Add stocks to start tracking your investments!
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Portfolio Item Modal -->
+<div class="modal fade" id="addPortfolioItemModal" tabindex="-1" aria-labelledby="addPortfolioItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPortfolioItemModalLabel">Add Stock to Portfolio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_portfolio_item') }}">
+                {{ portfolio_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.symbol.id }}" class="form-label">{{ portfolio_form.symbol.label }}</label>
+                        <div class="position-relative">
+                            {{ portfolio_form.symbol(class="form-control stock-symbol-input", placeholder="e.g. RELIANCE") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.quantity.id }}" class="form-label">{{ portfolio_form.quantity.label }}</label>
+                        {{ portfolio_form.quantity(class="form-control", placeholder="Number of shares") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.buy_price.id }}" class="form-label">{{ portfolio_form.buy_price.label }}</label>
+                        {{ portfolio_form.buy_price(class="form-control", placeholder="Price per share in INR") }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ portfolio_form.exchange.id }}" class="form-label">{{ portfolio_form.exchange.label }}</label>
+                        {{ portfolio_form.exchange(class="form-select") }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ portfolio_form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/portfolio.js') }}"></script>
+{% endblock %}
