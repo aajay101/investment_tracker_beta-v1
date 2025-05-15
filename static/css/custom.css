@@ -31,6 +31,7 @@ body {
 
 .card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .card-header {
@@ -43,29 +44,55 @@ body {
 /* Portfolio items */
 .portfolio-item {
   border-left: 4px solid var(--highlight-color);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .portfolio-item:hover {
   background-color: rgba(15, 52, 96, 0.5);
+  transform: translateX(5px);
+  box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .gain {
   color: var(--success-color);
+  position: relative;
+  padding-left: 18px;
+}
+
+.gain::before {
+  content: '▲';
+  font-size: 14px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .loss {
   color: var(--danger-color);
+  position: relative;
+  padding-left: 18px;
+}
+
+.loss::before {
+  content: '▼';
+  font-size: 14px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Watchlist items */
 .watchlist-item {
   border-left: 4px solid var(--highlight-color);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .watchlist-item:hover {
   background-color: rgba(15, 52, 96, 0.5);
+  transform: translateX(5px);
+  box-shadow: -5px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Form styling */
@@ -116,8 +143,14 @@ body {
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   height: 100%;
+  transition: all 0.3s ease;
+}
+
+.summary-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
 }
 
 .summary-box-title {
@@ -139,19 +172,23 @@ body {
 }
 
 .summary-box-investment {
-  background-color: rgba(52, 73, 94, 0.6);
+  background: linear-gradient(135deg, rgba(52, 73, 94, 0.8), rgba(52, 73, 94, 0.6));
+  border-left: 4px solid rgba(52, 73, 94, 1);
 }
 
 .summary-box-current {
-  background-color: rgba(39, 174, 96, 0.2);
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.4), rgba(39, 174, 96, 0.2));
+  border-left: 4px solid rgba(39, 174, 96, 0.8);
 }
 
 .summary-box-gain {
-  background-color: rgba(46, 204, 113, 0.2);
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.4), rgba(46, 204, 113, 0.2));
+  border-left: 4px solid rgba(46, 204, 113, 0.8);
 }
 
 .summary-box-loss {
-  background-color: rgba(231, 76, 60, 0.2);
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.4), rgba(231, 76, 60, 0.2));
+  border-left: 4px solid rgba(231, 76, 60, 0.8);
 }
 
 /* Notes styling */
