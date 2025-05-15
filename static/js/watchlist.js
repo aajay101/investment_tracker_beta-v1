@@ -66,18 +66,54 @@ function initWatchlistRefresh() {
     
     refreshButton.addEventListener('click', async function() {
         this.disabled = true;
-        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Refreshing...';
+        this.innerHTML = '<span class="loading-spinner"></span> Refreshing...';
         
         try {
             await refreshWatchlistPrices();
             this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Prices';
+            showNotification('Prices refreshed successfully!', 'success');
         } catch (error) {
             console.error('Error refreshing prices:', error);
             this.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Failed';
+            showNotification('Error refreshing some prices', 'danger');
         } finally {
             this.disabled = false;
         }
     });
+    
+    // Auto-refresh every 3 minutes for real-time data
+    setInterval(refreshWatchlistPrices, 3 * 60 * 1000);
+}
+
+/**
+ * Show notification at the top of the page
+ */
+function showNotification(message, type = 'info') {
+    // Create notification container if it doesn't exist
+    let container = document.querySelector('.notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'notification-container position-fixed top-0 start-50 translate-middle-x p-3';
+        container.style.zIndex = 1050;
+        document.body.appendChild(container);
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Add to container
+    container.appendChild(notification);
+    
+    // Auto dismiss after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 /**

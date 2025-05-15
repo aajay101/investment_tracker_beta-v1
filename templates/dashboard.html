@@ -9,12 +9,14 @@
         <div class="summary-box summary-box-investment">
             <div class="summary-box-title">Total Investment</div>
             <div class="summary-box-value">₹{{ "%.2f"|format(total_investment) }}</div>
+            <div class="summary-box-updated">Real-time data</div>
         </div>
     </div>
     <div class="col-md-3 mb-3">
         <div class="summary-box summary-box-current">
             <div class="summary-box-title">Current Value</div>
             <div class="summary-box-value">₹{{ "%.2f"|format(total_current_value) }}</div>
+            <div class="summary-box-updated">Updated: {{ now.strftime('%H:%M') }}</div>
         </div>
     </div>
     <div class="col-md-3 mb-3">
@@ -23,6 +25,9 @@
             <div class="summary-box-value {% if total_gain_loss >= 0 %}gain{% else %}loss{% endif %}">
                 ₹{{ "%.2f"|format(total_gain_loss) }}
             </div>
+            <div class="summary-box-badge {% if total_gain_loss >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                {{ "+" if total_gain_loss >= 0 else "" }}₹{{ "%.2f"|format(total_gain_loss) }}
+            </div>
         </div>
     </div>
     <div class="col-md-3 mb-3">
@@ -30,6 +35,9 @@
             <div class="summary-box-title">Total Return</div>
             <div class="summary-box-value {% if total_gain_loss_percent >= 0 %}gain{% else %}loss{% endif %}">
                 {{ "%.2f"|format(total_gain_loss_percent) }}%
+            </div>
+            <div class="summary-box-badge {% if total_gain_loss_percent >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                {{ "+" if total_gain_loss_percent >= 0 else "" }}{{ "%.2f"|format(total_gain_loss_percent) }}%
             </div>
         </div>
     </div>
@@ -148,9 +156,10 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">My Watchlist</h5>
                 <div>
-                    <button id="refresh-watchlist" class="btn btn-outline-info btn-sm me-2">
+                    <button id="refresh-watchlist" class="btn btn-outline-info btn-sm me-2" title="Prices auto-refresh every 3 minutes">
                         <i class="fas fa-sync-alt"></i> Refresh Prices
                     </button>
+                    <span class="badge bg-secondary me-2" title="Data freshness">Live Data</span>
                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addWatchlistItemModal">
                         <i class="fas fa-plus me-1"></i> Add Stock
                     </button>

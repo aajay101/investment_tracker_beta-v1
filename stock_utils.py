@@ -9,15 +9,16 @@ from functools import lru_cache
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Cache stock prices for 5 minutes to avoid excessive API calls
-@lru_cache(maxsize=128)
+# Cache stock prices for 2 minutes to ensure more recent data
+@lru_cache(maxsize=256)
 def get_stock_price_cached(symbol, timestamp=None):
     """Get the current price of a stock symbol with caching"""
-    # If timestamp not provided, round to nearest 5 minutes to enable caching
+    # If timestamp not provided, round to nearest 2 minutes to enable caching
+    # but still get relatively fresh data
     if timestamp is None:
-        # Round to nearest 5 minutes for cache effectiveness
+        # Round to nearest 2 minutes for better real-time data while still caching
         now = datetime.now()
-        timestamp = int((now.replace(second=0, microsecond=0).timestamp() // 300) * 300)
+        timestamp = int((now.replace(second=0, microsecond=0).timestamp() // 120) * 120)
     
     try:
         logger.info(f"Fetching price for {symbol} at timestamp {timestamp}")
