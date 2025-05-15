@@ -125,8 +125,9 @@
                         {{ portfolio_form.quantity(class="form-control", placeholder="Number of shares") }}
                     </div>
                     <div class="mb-3">
-                        <label for="{{ portfolio_form.buy_price.id }}" class="form-label">{{ portfolio_form.buy_price.label }}</label>
-                        {{ portfolio_form.buy_price(class="form-control", placeholder="Price per share in INR") }}
+                        <label for="{{ portfolio_form.buy_price.id }}" class="form-label">{{ portfolio_form.buy_price.label }} <span class="text-danger">*</span></label>
+                        {{ portfolio_form.buy_price(class="form-control", placeholder="Price per share in INR", required=true) }}
+                        <div class="form-text text-muted">Enter the price you paid per share</div>
                     </div>
                     <div class="mb-3">
                         <label for="{{ portfolio_form.exchange.id }}" class="form-label">{{ portfolio_form.exchange.label }}</label>

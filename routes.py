@@ -427,7 +427,18 @@ def add_portfolio_item():
             
         # Get remaining form data
         quantity = form.quantity.data
-        buy_price = float(form.buy_price.data)
+        
+        # Check and extract buy_price
+        if form.buy_price.data is None:
+            flash("Buy price is required", "danger")
+            return redirect(url_for('dashboard'))
+            
+        try:
+            buy_price = float(form.buy_price.data)
+        except (ValueError, TypeError):
+            flash("Buy price must be a valid number", "danger")
+            return redirect(url_for('dashboard'))
+            
         exchange = form.exchange.data
             
         # Validate the buy price
